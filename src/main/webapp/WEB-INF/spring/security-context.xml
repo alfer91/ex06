@@ -4,12 +4,41 @@
 	xmlns:security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+		
+	<bean id="customAccessDenied" class="org.zerock.security.CustomAccessDeniedHandler"></bean>  <!-- bean 등록 -->
+	<bean id="customLoginSuccess" class="org.zerock.security.CustomLoginSuccessHandler"></bean>
 
-	<security:http>
-		<security:form-login/>
+	<security:http> <!-- <security:http auto-config="true" use-expressions="false"> 단순 문자열만 이용 -->
+	
+		<security:intercept-url pattern="/sample/all" access="permitAll"/>  <!-- 표현식 이용(기본 설정) -->
+		<security:intercept-url pattern="/sample/member" access="hasRole('ROLE_MEMBER')"/>
+		<security:intercept-url pattern="/sample/admin" access="hasRole('ROLE_ADMIN')"/>
+	
+		
+		
+		<!-- <security:access-denied-handler error-page="/accessError"/> -->  <!-- error-page 를 불러오지만 URI 는 /sample/admin -->
+		<security:access-denied-handler ref="customAccessDenied"/>  <!-- 접근 제한 처리 : AccessDeniedHandler 직접 구현 or 특정 URI 지정 -->
+
+		<!-- <security:form-login/> -->  <!-- 기본 로그인 페이지 -->
+		<security:form-login login-page="/customLogin" authentication-success-handler-ref="customLoginSuccess"/>  <!-- 로그인 페이지 지정, AuthenticationSuccessHandler 직접 구현 -->
+		
+		<security:logout logout-url="/customLogout" invalidate-session="true"/>  <!-- 로그아웃, 세션 무효화 -->
+		
+		<!-- <security:csrf disabled="true"/> -->  <!-- 일반적으로 CSRF 토큰은 세션을 통해 보관, CSRF 토큰 생성 비활성화, 쿠키를 이용해서 처리하는 설정 지원 -->
 	</security:http>
 	
-	<security:authentication-manager>
+	<security:authentication-manager>  <!-- AuthenticationManager 인증을 담당하는 매니저  -->
+		
+		<security:authentication-provider>  <!-- 인증 권한 처리 : AuthenticationProvider 를 직접 구현하는 방식과  -->
+			<security:user-service>  <!-- UserDetailsService 를 구현하는 방식이 있음 -->
+			
+				<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER"/>  <!-- {noop} 패스워드 인코딩 처리 없이 사용 -->
+				<!-- 세션 쿠키 : 개발자도구 - applcation - cookies - JSESSIONID -->
+				
+				<security:user name="admin" password="{noop}admin" authorities="ROLE_MEMBER, ROLE_ADMIN"/>  <!-- ROLE_ADMIN, ROLE_MEMBER 2개의 권한을 가짐 -->  
+			
+			</security:user-service>
+		</security:authentication-provider>
 	
 	</security:authentication-manager>
 </beans>
