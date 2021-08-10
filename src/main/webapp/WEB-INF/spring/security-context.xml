@@ -7,6 +7,8 @@
 		
 	<bean id="customAccessDenied" class="org.zerock.security.CustomAccessDeniedHandler"></bean>  <!-- bean 등록 -->
 	<bean id="customLoginSuccess" class="org.zerock.security.CustomLoginSuccessHandler"></bean>
+	<!-- <bean id="customPasswordEncoder" class="org.zerock.security.CustomNoOpPasswordEncoder"></bean> -->
+	<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
 
 	<security:http> <!-- <security:http auto-config="true" use-expressions="false"> 단순 문자열만 이용 -->
 	
@@ -30,14 +32,17 @@
 	<security:authentication-manager>  <!-- AuthenticationManager 인증을 담당하는 매니저  -->
 		
 		<security:authentication-provider>  <!-- 인증 권한 처리 : AuthenticationProvider 를 직접 구현하는 방식과  -->
-			<security:user-service>  <!-- UserDetailsService 를 구현하는 방식이 있음 -->
+			<!-- <security:jdbc-user-service data-source-ref="dataSource"/> -->
+			<security:jdbc-user-service data-source-ref="dataSource" 
+			users-by-username-query="select userid, userpw, enabled from tbl_member where userid = ?"  
+			authorities-by-username-query="select userid, auth from tbl_member_auth where userid = ?"/>
+			<!-- users-by-username-query : 인증을 위해 필요한 쿼리
+			 	 authorities-by-username-query : 권한을 확인하는데 필요한 쿼리 -->
 			
-				<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER"/>  <!-- {noop} 패스워드 인코딩 처리 없이 사용 -->
-				<!-- 세션 쿠키 : 개발자도구 - applcation - cookies - JSESSIONID -->
-				
-				<security:user name="admin" password="{noop}admin" authorities="ROLE_MEMBER, ROLE_ADMIN"/>  <!-- ROLE_ADMIN, ROLE_MEMBER 2개의 권한을 가짐 -->  
-			
-			</security:user-service>
+			<!-- <security:password-encoder ref="customPasswordEncoder"/> -->  <!-- 5버전부터 NoOpPasswordEncoder Deprecated 됨, PasswordEncoder 사용 -->
+			<security:password-encoder ref="bcryptPasswordEncoder"/>  
+			<!-- bcrypt : 태생 자체가 패스워드를 저장하는 용도로 설계된 해시 함수로 특정 문자열을 암호화, 
+			체크하는 쪽에서는 암호화 된 패스워드가 가능한 패스워드인지만 확인하고 다시 원문으로 되돌리지는 못함 -->			
 		</security:authentication-provider>
 	
 	</security:authentication-manager>
