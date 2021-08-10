@@ -24,7 +24,9 @@
 		<!-- <security:form-login/> -->  <!-- 기본 로그인 페이지 -->
 		<security:form-login login-page="/customLogin" authentication-success-handler-ref="customLoginSuccess"/>  <!-- 로그인 페이지 지정, AuthenticationSuccessHandler 직접 구현 -->
 		
-		<security:logout logout-url="/customLogout" invalidate-session="true"/>  <!-- 로그아웃, 세션 무효화 -->
+		<security:logout logout-url="/customLogout" invalidate-session="true" delete-cookies="remember-me,JSESSION_ID"/>  <!-- 로그아웃, 세션 무효화, 쿠키 삭제 -->
+		
+		<security:remember-me data-source-ref="dataSource" token-validity-seconds="604800"/>  <!-- 자동으로 persistence_logins 테이블에 로그인 정보가 생성&삭제됨, 쿠키 유효기간 7일 -->
 		
 		<!-- <security:csrf disabled="true"/> -->  <!-- 일반적으로 CSRF 토큰은 세션을 통해 보관, CSRF 토큰 생성 비활성화, 쿠키를 이용해서 처리하는 설정 지원 -->
 	</security:http>

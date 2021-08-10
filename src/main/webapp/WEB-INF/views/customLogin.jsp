@@ -21,6 +21,9 @@
 			<input type="password" name="password" value="admin">
 		</div>
 		<div>
+			<input type="checkbox" name="remember-me"> Remember Me  <!-- 로그인 시 자동으로 remember-me 쿠키 생성, Request Header 에서 cookie 정보 전송됨 -->
+		</div>
+		<div>
 			<input type="submit">
 		</div>
 		<input type="hidden" name="${_csrf.parameterName }" value="${_csrf.token }">  
